@@ -56,6 +56,9 @@
                     contentType: "application/json",
                     data: JSON.stringify({ thread_link: threadLink }),
                     success: function(response) {
+
+                        console.log(response);
+
                         $("#loading").addClass("hidden"); // Hide spinner
                         $("#results").removeClass("hidden"); // Show results
                         $("#summary").text(response.summary);
@@ -73,7 +76,7 @@
                     },
                     error: function() {
                         $("#loading").addClass("hidden"); // Hide spinner
-                        alert("Error analyzing the thread. Please try again.");
+                        alert("Error analyzing the thread. Please try Other Valid URL.");
                     }
                 });
             });

@@ -58,7 +58,7 @@ def analyze_cyberbullying(tweets):
         "message": "Analysis complete.",
         "percentage": percentage,
         "summary": "This thread contains cyberbullying content." if percentage > 50 else "This thread seems safe.",
-        "chart_data": [len(tweets) - harmful_count, harmful_count]  # Example chart data for visualization
+        "chart_data": [len(tweets) - harmful_count, harmful_count]  
     }
 
 @app.route('/analyze', methods=['POST'])
