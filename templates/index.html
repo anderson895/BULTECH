@@ -38,49 +38,56 @@
     
     <script>
         $(document).ready(function() {
+            var chartInstance = null; // Store chart instance
+            var threadRegex = /^https:\/\/x\.com\/[A-Za-z0-9_]+\/status\/\d+$/; // Regex for valid thread link
+            
             $("#analyze").click(function() {
-                var threadLink = $("#thread-link").val();
-                
-                if (!threadLink) {
-                    alert("Please enter a Twitter thread link.");
-                    return;
-                }
-
-                // Show loading spinner and hide results
+                var threadLink = $("#thread-link").val().trim();
+    
+    
+                // Disable button, show loading spinner, and hide results
+                $("#analyze").prop("disabled", true).text("Analyzing...");
                 $("#loading").removeClass("hidden");
                 $("#results").addClass("hidden");
-
+    
                 $.ajax({
                     url: "/analyze",
                     type: "POST",
                     contentType: "application/json",
                     data: JSON.stringify({ thread_link: threadLink }),
                     success: function(response) {
-
-                        console.log(response);
-
                         $("#loading").addClass("hidden"); // Hide spinner
                         $("#results").removeClass("hidden"); // Show results
                         $("#summary").text(response.summary);
                         $("#percentage").text(response.percentage + "%");
                         $("#details").text("This thread consists of OFFENSIVE LANGUAGE AND PROFANITY");
-
-                        // Update chart
-                        var chart = new ApexCharts(document.querySelector("#chart"), {
+    
+                        // Destroy previous chart instance if it exists
+                        if (chartInstance) {
+                            chartInstance.destroy();
+                        }
+    
+                        // Create new chart
+                        chartInstance = new ApexCharts(document.querySelector("#chart"), {
                             chart: { type: "bar", height: 250 },
                             series: [{ data: response.chart_data }],
                             xaxis: { categories: ["Safe Content", "Cyberbullying"] },
                             colors: ["#22c55e", "#ef4444"]
                         });
-                        chart.render();
+                        chartInstance.render();
                     },
-                    error: function() {
+                    error: function(xhr) {
                         $("#loading").addClass("hidden"); // Hide spinner
-                        alert("Error analyzing the thread. Please try Other Valid URL.");
+                        alert("Error analyzing the thread. Please enter a valid link in the format: ");
+                    },
+                    complete: function() {
+                        // Re-enable the button after request is done
+                        $("#analyze").prop("disabled", false).text("ANALYZE");
                     }
                 });
             });
         });
     </script>
+    
 </body>
 </html>
