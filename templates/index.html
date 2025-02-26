@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyberbullying Detector</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+</head>
+<body class="flex justify-center items-center min-h-screen bg-gray-100">
+    <div class="w-full max-w-2xl bg-white shadow-md p-6 rounded-lg">
+        <h1 class="text-center text-2xl font-bold">CYBERBULLYING DETECTOR</h1>
+        
+        <div class="mt-4">
+            <input type="text" id="thread-link" class="w-full border p-2 rounded-lg" placeholder="Paste X Thread Link">
+            <button id="analyze" class="w-full mt-2 bg-black text-white py-2 rounded-lg">ANALYZE</button>
+        </div>
+
+        <!-- Loading Spinner -->
+        <div id="loading" class="hidden mt-4 flex justify-center">
+            <div class="animate-spin rounded-full h-10 w-10 border-t-4 border-blue-500"></div>
+        </div>
+
+        <div class="mt-6 hidden" id="results">
+            <h2 class="text-lg font-bold">RESULTS:</h2>
+            <div class="bg-gray-100 p-4 rounded-lg mt-2">
+                <p class="text-red-600 font-semibold" id="summary"></p>
+            </div>
+            <div class="mt-4 text-center">
+                <span class="text-3xl font-bold text-red-600" id="percentage"></span>
+                <p class="font-semibold">of the thread consists of <span class="text-red-600">CYBERBULLYING CONTENT.</span></p>
+            </div>
+            <div id="chart" class="mt-6"></div>
+            <p class="text-center text-red-600 font-semibold mt-2" id="details"></p>
+        </div>
+    </div>
+    
+    <script>
+        $(document).ready(function() {
+            $("#analyze").click(function() {
+                var threadLink = $("#thread-link").val();
+                
+                if (!threadLink) {
+                    alert("Please enter a Twitter thread link.");
+                    return;
+                }
+
+                // Show loading spinner and hide results
+                $("#loading").removeClass("hidden");
+                $("#results").addClass("hidden");
+
+                $.ajax({
+                    url: "/analyze",
+                    type: "POST",
+                    contentType: "application/json",
+                    data: JSON.stringify({ thread_link: threadLink }),
+                    success: function(response) {
+                        $("#loading").addClass("hidden"); // Hide spinner
+                        $("#results").removeClass("hidden"); // Show results
+                        $("#summary").text(response.summary);
+                        $("#percentage").text(response.percentage + "%");
+                        $("#details").text("This thread consists of OFFENSIVE LANGUAGE AND PROFANITY");
+
+                        // Update chart
+                        var chart = new ApexCharts(document.querySelector("#chart"), {
+                            chart: { type: "bar", height: 250 },
+                            series: [{ data: response.chart_data }],
+                            xaxis: { categories: ["Safe Content", "Cyberbullying"] },
+                            colors: ["#22c55e", "#ef4444"]
+                        });
+                        chart.render();
+                    },
+                    error: function() {
+                        $("#loading").addClass("hidden"); // Hide spinner
+                        alert("Error analyzing the thread. Please try again.");
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
